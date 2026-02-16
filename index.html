@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAD ⇄ PHP Converter</title>
+    <style>
+        :root { --primary: #004a99; --secondary: #d8232a; --bg: #f0f2f5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; position: relative; }
+        label { display: block; font-size: 0.8rem; font-weight: bold; color: #666; margin-bottom: 5px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 1.2rem; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: var(--primary); }
+        .swap-btn { display: block; margin: 10px auto; background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+        .swap-btn:active { transform: rotate(180deg); }
+        .rate-info { text-align: center; font-size: 0.85rem; color: #888; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <h2 id="title">CAD to PHP</h2>
+    </div>
+
+    <div id="top-group" class="input-group">
+        <label id="label-from">Canadian Dollar (CAD)</label>
+        <input type="number" id="inputFrom" placeholder="0.00" oninput="convert()">
+    </div>
+
+    <button class="swap-btn" onclick="swapCurrencies()">⇄</button>
+
+    <div id="bottom-group" class="input-group">
+        <label id="label-to">Philippine Peso (PHP)</label>
+        <input type="number" id="inputTo" placeholder="0.00" readonly style="background: #f9f9f9; color: #2e7d32; font-weight: bold;">
+    </div>
+
+    <div class="rate-info" id="status">Fetching live rates...</div>
+</div>
+
+<script>
+    let rate = 0;
+    let isCadToPhp = true;
+
+    async function getRates() {
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/CAD');
+            const data = await res.json();
+            rate = data.rates.PHP;
+            updateStatus();
+        } catch (e) {
+            document.getElementById('status').innerText = "Offline - check connection";
+        }
+    }
+
+    function updateStatus() {
+        const displayRate = isCadToPhp ? rate : (1 / rate);
+        const fromSym = isCadToPhp ? "CAD" : "PHP";
+        const toSym = isCadToPhp ? "PHP" : "CAD";
+        document.getElementById('status').innerText = `1 ${fromSym} = ${displayRate.toFixed(4)} ${toSym}`;
+    }
+
+    function convert() {
+        const val = document.getElementById('inputFrom').value;
+        const out = document.getElementById('inputTo');
+        if (!val) { out.value = ""; return; }
+        
+        const result = isCadToPhp ? (val * rate) : (val / rate);
+        out.value = result.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    function swapCurrencies() {
+        isCadToPhp = !isCadToPhp;
+        document.getElementById('title').innerText = isCadToPhp ? "CAD to PHP" : "PHP to CAD";
+        document.getElementById('label-from').innerText = isCadToPhp ? "Canadian Dollar (CAD)" : "Philippine Peso (PHP)";
+        document.getElementById('label-to').innerText = isCadToPhp ? "Philippine Peso (PHP)" : "Canadian Dollar (CAD)";
+        document.getElementById('inputFrom').value = "";
+        document.getElementById('inputTo').value = "";
+        updateStatus();
+    }
+
+    getRates();
+</script>
+
+</body>
+</html>
+
