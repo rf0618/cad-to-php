@@ -68,7 +68,7 @@
         if (!val) { out.value = ""; return; }
         
         const result = isCadToPhp ? (val * rate) : (val / rate);
-        out.value = result.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        out.value = result.toFixed(2);
     }
 
     function swapCurrencies() {
