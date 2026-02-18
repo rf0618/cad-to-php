@@ -31,6 +31,8 @@
     </div>
 
     <button class="swap-btn" onclick="swapCurrencies()">⇄</button>
+    <button onclick="resetApp()" style="margin-top: 10px; background: #6c757d;">Clear All</button>
+
 
     <div id="bottom-group" class="input-group">
         <label id="label-to">Philippine Peso (PHP)</label>
@@ -82,6 +84,11 @@
     }
 
     getRates();
+    function resetApp() {
+    document.getElementById('input1').value = "";
+    document.getElementById('input2').value = "";
+}
+
 </script>
 
 </body>
