@@ -2,81 +2,58 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Converter</title>
+    <title>PHP to CAD Converter</title>
     <style>
         body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; padding: 20px; background: #f4f4f9; }
         .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 300px; text-align: center; }
         h2 { margin-bottom: 20px; color: #333; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; color: white; background: #007bff; }
-        .secondary-btn { background: #6c757d; }
+        .clear-btn { background: #6c757d; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 id="title">CAD ⇄ JPY</h2>
-    <input type="number" id="inputFrom" placeholder="CAD" oninput="convert()">
-    <input type="number" id="inputTo" placeholder="JPY" oninput="convert()">
+    <h2>PHP ⇄ CAD</h2>
+    <input type="number" id="phpInput" placeholder="Enter Pesos (₱)" oninput="convert()">
+    <input type="number" id="cadInput" placeholder="Canadian Dollars ($)" oninput="convert()">
     
-    <button onclick="swapCurrencies()">⇄ Swap Currencies</button>
-    <button onclick="toggleTarget()" class="secondary-btn">Switch JPY/PHP</button>
-    <button onclick="resetApp()" class="secondary-btn">Clear All</button>
+    <button onclick="resetApp()" class="clear-btn">Clear All</button>
 </div>
 
 <script>
-    let rate = 0;
-    let targetCurrency = "JPY"; // Default for Tokyo
-    let isSwapped = false;
+    let phpToCadRate = 0;
 
     async function getRates() {
         try {
+            // Fetching CAD base to get the current conversion
             const response = await fetch('https://open.er-api.com/v6/latest/CAD');
             const data = await response.json();
-            rate = data.rates[targetCurrency];
-            document.getElementById('title').innerText = `CAD ⇄ ${targetCurrency}`;
-            document.getElementById('inputTo').placeholder = targetCurrency;
+            // We want the rate of 1 PHP in CAD
+            phpToCadRate = 1 / data.rates.PHP; 
         } catch (error) {
             console.error("Rate fetch failed");
         }
     }
 
     function convert() {
-        const from = document.getElementById('inputFrom');
-        const to = document.getElementById('inputTo');
+        const php = document.getElementById('phpInput');
+        const cad = document.getElementById('cadInput');
         
-        if (document.activeElement === from) {
-            to.value = from.value ? (from.value * rate).toFixed(2) : "";
+        if (document.activeElement === php) {
+            cad.value = php.value ? (php.value * phpToCadRate).toFixed(2) : "";
         } else {
-            to.value = from.value ? (to.value / rate).toFixed(2) : "";
+            php.value = cad.value ? (cad.value / phpToCadRate).toFixed(2) : "";
         }
     }
 
-    function swapCurrencies() {
-        isSwapped = !isSwapped;
-        const fromLabel = isSwapped ? targetCurrency : "CAD";
-        const toLabel = isSwapped ? "CAD" : targetCurrency;
-        
-        document.getElementById('inputFrom').placeholder = fromLabel;
-        document.getElementById('inputTo').placeholder = toLabel;
-        
-        // Correct the rate for swap
-        rate = 1 / rate;
-        resetApp();
-    }
-
-    function toggleTarget() {
-        targetCurrency = (targetCurrency === "JPY") ? "PHP" : "JPY";
-        getRates();
-        resetApp();
-    }
-
     function resetApp() {
-        document.getElementById('inputFrom').value = "";
-        document.getElementById('inputTo').value = "";
+        document.getElementById('phpInput').value = "";
+        document.getElementById('cadInput').value = "";
     }
 
-    getRates(); // Initialize on load
+    getRates();
 </script>
 
 </body>
