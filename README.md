@@ -1,2 +1,2 @@
-# cad-to-php
-cad-to-php conversion 
+# cad-to-usd
+cad-to-usd conversion
